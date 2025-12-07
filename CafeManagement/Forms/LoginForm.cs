@@ -45,7 +45,7 @@ namespace CafeManagement
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            Account? account = new AccountDAO().CheckLogin(txtUsername.Text, txtPassword.Text);
+            Account? account = AccountDAO.Instance.CheckLogin(txtUsername.Text, txtPassword.Text);
             if (account != null)
             {
                 MessageBox.Show(

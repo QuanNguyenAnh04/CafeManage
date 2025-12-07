@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "TBkpOchvk0A=",
+  "dgSpecHash": "0VJW/VcL7U8=",
   "success": true,
-  "projectFilePath": "C:\\Users\\nguye\\source\\gitClone\\CafeManagement\\CafeManagement.csproj",
+  "projectFilePath": "D:\\beforeUnfo\\BảnTRuocgit\\CafeManagement\\CafeManagement\\CafeManagement.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\nguye\\.nuget\\packages\\azure.core\\1.47.1\\azure.core.1.47.1.nupkg.sha512",
     "C:\\Users\\nguye\\.nuget\\packages\\azure.identity\\1.14.2\\azure.identity.1.14.2.nupkg.sha512",

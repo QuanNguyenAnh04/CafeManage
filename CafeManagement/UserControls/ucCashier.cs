@@ -22,8 +22,6 @@ namespace CafeManagement.Forms
         private TableDAO tableDAO = new TableDAO();
         private CategoryDAO categoryDAO = new CategoryDAO();
 
-        private List<OrderItem> orderList = new List<OrderItem>();
-
         private string currentSearchKeyword = ""; // Từ khóa tìm kiếm hiện tại
         private int? currentCategoryId = null; // Danh mục hiện tại, có thể là null nếu không chọn danh mục
 
@@ -37,12 +35,9 @@ namespace CafeManagement.Forms
         {
             InitializeComponent();
 
-            LoadTables();       // Load bàn
-            LoadCategories();   // Load danh mục (mặc định All)
-            LoadProducts();     // Load tất cả sản phẩm
-
-            numDiscount.ValueChanged += (s, e) => UpdateTotalPrice();
-
+            LoadTables();
+            LoadCategories();
+            LoadProducts();
         }
 
         private void LoadTables()
@@ -59,9 +54,9 @@ namespace CafeManagement.Forms
                 Button btnTable = new Button
                 {
                     Text = table.TableName,
-                    Width = 95,
-                    Height = 95,
-                    Margin = new Padding(12),
+                    Width = 80,
+                    Height = 80,
+                    Margin = new Padding(10),
                     FlatStyle = FlatStyle.Flat, // Sử dụng phong cách phẳng để loại bỏ hiệu ứng 3D
                     FlatAppearance = { BorderSize = 1, BorderColor = Color.Gray }, // Viền đơn giản với màu xám
                     Anchor = AnchorStyles.Left | AnchorStyles.Top,
@@ -91,8 +86,8 @@ namespace CafeManagement.Forms
                         clickedButton.Tag = table;
                         selectedTable = clickedButton;
 
-                        // Cập nhật lblTitleTable
-                        lblTitleTable.Text = table.TableName;
+                        // Thông báo khi chọn bàn
+                        MessageBox.Show("Bạn chọn bàn: " + table.TableName);
                     }
                 };
 
@@ -107,20 +102,22 @@ namespace CafeManagement.Forms
         private void LoadCategories()
         {
             panelCategories.Controls.Clear(); // Xóa các item cũ trong panelCategories
-            panelCategories.AutoScroll = true; // Cho phép cuộn khi vượt quá kích thước
+            panelCategories.AutoScroll = true; // Cho phép scroll khi vượt quá kích thước
             panelCategories.FlowDirection = FlowDirection.LeftToRight; // Hiển thị các button theo chiều ngang
-            panelCategories.WrapContents = true; // Cho phép xuống dòng khi không đủ chỗ
+            panelCategories.WrapContents = false; // Cho phép xuống dòng khi không đủ chỗ
 
-            // Button "Tất cả" để hiển thị tất cả sản phẩm
+            // Tạo nút "Tất cả" để hiển thị tất cả sản phẩm
             Button btnAll = new Button
             {
                 Text = "Tất cả",
                 Width = 100,
-                Height = 40,
+                Height = 40, // Chiều cao của button
                 Margin = new Padding(10),
                 BackColor = Color.LightBlue, // Màu mặc định cho "Tất cả"
                 FlatStyle = FlatStyle.Flat,
                 FlatAppearance = { BorderSize = 1, BorderColor = Color.Gray },
+                AutoSize = false,
+                Anchor = AnchorStyles.Left | AnchorStyles.Top,
                 Dock = DockStyle.None
             };
 
@@ -129,240 +126,191 @@ namespace CafeManagement.Forms
             // Sự kiện khi chọn "Tất cả"
             btnAll.Click += (s, e) =>
             {
-                if (selectedCategory != null) selectedCategory.BackColor = Color.White; // Reset màu cũ
-                btnAll.BackColor = Color.LightBlue; // Màu xanh cho button đang chọn
-                selectedCategory = btnAll;
-                LoadProducts(); // Load tất cả sản phẩm
+                // Đổi màu cho button "Tất cả"
+                if (this.selectedCategory != null)
+                {
+                    this.selectedCategory.BackColor = Color.White;
+                }
+
+                btnAll.BackColor = Color.LightBlue;
+                this.selectedCategory = btnAll; // Lưu lại button đang chọn
+
+                // Load tất cả sản phẩm khi chọn "Tất cả"
+                LoadProducts();
             };
+
+            // Thêm button "Tất cả" vào panel
             panelCategories.Controls.Add(btnAll);
 
-            // Load danh mục từ database
+            // Lấy danh mục từ cơ sở dữ liệu thông qua CategoryDAO
             List<Category> categories = categoryDAO.GetAllCategories();
 
-            foreach (var cat in categories)
+            // Tạo danh sách button danh mục
+            foreach (var category in categories)
             {
-                Button btn = new Button
+                Button btnCategory = new Button
                 {
-                    Text = cat.CategoryName,
+                    Text = category.CategoryName,
                     Width = 100,
-                    Height = 40,
+                    Height = 40, // Chiều cao của button
                     Margin = new Padding(10),
                     BackColor = Color.White,
-                    FlatStyle = FlatStyle.Flat,
+                    FlatStyle = FlatStyle.Flat, // Sử dụng phong cách phẳng để loại bỏ hiệu ứng 3D
                     FlatAppearance = { BorderSize = 1, BorderColor = Color.Gray },
-                    Tag = cat,
+                    AutoSize = false,
+                    Anchor = AnchorStyles.Left | AnchorStyles.Top,
                     Dock = DockStyle.None
                 };
 
-                // Sự kiện click vào button danh mục
-                btn.Click += (s, e) =>
-                {
-                    if (selectedCategory != null) selectedCategory.BackColor = Color.White; // Reset màu cũ
-                    btn.BackColor = Color.LightBlue; // Màu xanh cho button đang chọn
-                    selectedCategory = btn;
+                // Lưu thông tin về Category vào Tag của Button
+                btnCategory.Tag = category;
 
-                    if (btn.Tag is Category selectedCat)
+                // Sự kiện click vào button danh mục
+                btnCategory.Click += (s, e) =>
+                {
+                    if (s is Button clickedButton)
                     {
-                        LoadProducts(selectedCat.CategoryID); // Load sản phẩm theo danh mục
+                        // Reset màu cho button trước đó nếu có
+                        if (this.selectedCategory != null)
+                        {
+                            this.selectedCategory.BackColor = Color.White;
+                        }
+
+                        // Đổi màu cho button được chọn
+                        clickedButton.BackColor = Color.LightBlue; // Màu xanh cho button đang được chọn
+                        this.selectedCategory = clickedButton; // Lưu lại button đang chọn
+
+                        // Lấy thông tin từ Tag (danh mục đã chọn)
+                        if (clickedButton.Tag is Category selectedCat)
+                        {
+                            MessageBox.Show("Bạn đã chọn danh mục: " + selectedCat.CategoryName);
+                            // Load sản phẩm theo danh mục đã chọn
+                            LoadProductsByCategory(selectedCat.CategoryID);
+                        }
                     }
                 };
 
-                panelCategories.Controls.Add(btn);
+                panelCategories.Controls.Add(btnCategory);
             }
 
-            // SEARCH BOX
+            // Thêm ô tìm kiếm sản phẩm vào panelCategories (ở cuối các button category)
+            TextBox searchBox = new TextBox
+            {
+                Width = 220,
+                Height = 40,
+                Margin = new Padding(10),
+                PlaceholderText = "Tìm kiếm sản phẩm...", // Placeholder để chỉ rõ người dùng có thể tìm kiếm
+                AutoSize = false,
+                Anchor = AnchorStyles.Left | AnchorStyles.Top,
+                Dock = DockStyle.None,
+            };
+
             searchBox.TextChanged += (s, e) =>
             {
-                // Khi có sự thay đổi trong ô tìm kiếm, gọi phương thức SearchProducts
-                SearchProducts(searchBox.Text);
+                // Khi có sự thay đổi trong ô tìm kiếm, gọi phương thức LoadProducts để lọc sản phẩm
+                LoadProductsBySearch(searchBox.Text);
             };
+
+            // Thêm TextBox vào cuối panelCategories
+            panelCategories.Controls.Add(searchBox);
         }
 
-        // Load sản phẩm theo category (gọi RefreshProducts)
-        private void LoadProducts(int? categoryId = null)
+        // Phương thức để load sản phẩm theo từ khóa tìm kiếm
+        private void LoadProductsBySearch(string searchKeyword)
         {
-            currentCategoryId = categoryId; // Lưu category đang chọn
-            RefreshProducts(); // Load theo category + từ khóa hiện tại
-        }
+            // Xóa các item cũ trong panelProducts
+            panelProducts.Controls.Clear();
+            panelProducts.AutoScroll = true; // Cho phép scroll
+            panelProducts.WrapContents = true; // xuống dòng khi hết chỗ
+            panelProducts.FlowDirection = FlowDirection.LeftToRight;
 
-        // Search sản phẩm
-        public void SearchProducts(string keyword)
-        {
-            currentSearchKeyword = keyword; // Lưu từ khóa
-            RefreshProducts(); // Load theo category + từ khóa hiện tại
-        }
+            // Lấy danh sách sản phẩm dựa trên tên tìm kiếm
+            List<CafeManagement.Models.Product> products = productDAO.GetProductsByName(searchKeyword);
 
-        // QUẢN LÝ ORDER
-        private void AddToOrder(Product product)
-        {
-            var existing = orderList.FirstOrDefault(o => o.Product != null && o.Product.ProductID == product.ProductID);
-
-            if (existing != null)
+            foreach (var product in products)
             {
-                existing.Quantity += 1; // Tăng số lượng nếu đã có
-                UpdateTotalPrice();
-                return;
+                ProductItem item = new ProductItem();
+                item.Product = product;
+                item.Width = 150;
+                item.Height = 200;
+                item.Margin = new Padding(10); // khoảng cách giữa các item
+
+                // Thêm sự kiện AddClicked vào ProductItem
+                item.AddClicked += (s, e) =>
+                {
+                    if (s is ProductItem clickedItem && clickedItem.Product != null)
+                    {
+                        MessageBox.Show($"Thêm {product.ProductName} vào giỏ hàng");
+                    }
+                };
+
+                panelProducts.Controls.Add(item);
             }
-
-            // Nếu chưa có, tạo OrderItem mới
-            OrderItem newItem = new OrderItem
-            {
-                Product = product,
-                Quantity = 1
-            };
-
-            // Khi bấm nút xóa trong OrderItem
-            newItem.Removed += (s, e) =>
-            {
-                orderList.Remove(newItem);
-                panelOrders.Controls.Remove(newItem);
-                UpdateTotalPrice();
-            };
-
-            // Khi tăng giảm số lượng trong OrderItem
-            newItem.QuantityChanged += (s, e) =>
-            {
-                UpdateTotalPrice();
-            };
-
-            orderList.Add(newItem);
-            panelOrders.Controls.Add(newItem);
-            UpdateTotalPrice();
         }
 
-        // REFRESH SẢN PHẨM (category + search)
-        private void RefreshProducts()
+        // Cập nhật phương thức LoadProductsByCategory để load sản phẩm theo category
+        private void LoadProductsByCategory(int categoryId)
         {
+            // Xóa các item cũ trong panelProducts
             panelProducts.Controls.Clear();
             panelProducts.AutoScroll = true;
             panelProducts.WrapContents = true;
             panelProducts.FlowDirection = FlowDirection.LeftToRight;
 
-            List<Product> products;
+            // Lấy danh sách sản phẩm theo categoryId
+            List<CafeManagement.Models.Product> products = productDAO.GetProductsByCategory(categoryId);
 
-            // Lấy sản phẩm theo category đang chọn
-            if (currentCategoryId.HasValue)
-                products = productDAO.GetProductsByCategory(currentCategoryId.Value);
-            else
-                products = productDAO.GetAllProducts();
-
-            // Lọc theo từ khóa tìm kiếm
-            if (!string.IsNullOrWhiteSpace(currentSearchKeyword))
+            foreach (var product in products)
             {
-                string k = currentSearchKeyword.ToLower();
-                products = products.Where(p => p.ProductName.ToLower().Contains(k)).ToList();
-            }
+                ProductItem item = new ProductItem();
+                item.Product = product;
+                item.Width = 150;
+                item.Height = 200;
+                item.Margin = new Padding(10);
 
-            foreach (var p in products)
-            {
-                ProductItem item = new ProductItem
+                // Thêm sự kiện AddClicked vào ProductItem
+                item.AddClicked += (s, e) =>
                 {
-                    Product = p,
-                    Width = 150,
-                    Height = 200,
-                    Margin = new Padding(10)
+                    if (s is ProductItem clickedItem && clickedItem.Product != null)
+                    {
+                        MessageBox.Show($"Thêm {product.ProductName} vào giỏ hàng");
+                    }
                 };
-                item.AddClicked += (s, e) => AddToOrder(p);
+
                 panelProducts.Controls.Add(item);
             }
         }
 
-        private void UpdateTotalPrice()
+        private void LoadProducts()
         {
-            if (orderList.Count == 0)
+            // Xóa các item cũ trong panelProducts
+            panelProducts.Controls.Clear();
+            panelProducts.AutoScroll = true; // Cho phép scroll
+            panelProducts.WrapContents = true; // xuống dòng khi hết chỗ
+            panelProducts.FlowDirection = FlowDirection.LeftToRight;
+
+            List<CafeManagement.Models.Product> products = productDAO.GetAllProducts();
+
+            foreach (var product in products)
             {
-                lblTmpTotalPrice.Text = "0 VNĐ";
-                lblTotalPrice.Text = "0 VNĐ";
-                return;
-            }
+                ProductItem item = new ProductItem();
+                item.Product = product;
+                item.Width = 150;
+                item.Height = 200;
+                item.Margin = new Padding(10); // khoảng cách giữa các item
 
-            decimal total = orderList
-                .Where(o => o.Product != null)
-                .Sum(o => o.Product!.Price * o.Quantity); // giả sử Price là decimal
-
-            // Hiển thị giá gốc
-            lblTmpTotalPrice.Text = $"{total:N0} VNĐ";
-
-            // Áp dụng discount (decimal)
-            decimal discountPercent = numDiscount.Value; // giữ decimal
-            decimal totalAfterDiscount = total - (total * discountPercent / 100);
-
-            lblTotalPrice.Text = $"{totalAfterDiscount:N0} VNĐ";
-        }
-
-        // THANH TOÁN
-        private void btnPay_Click(object sender, EventArgs e)
-        {
-            if (orderList.Count == 0)
-            {
-                MessageBox.Show("Danh sách order trống!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            if (selectedTable == null)
-            {
-                MessageBox.Show("Vui lòng chọn bàn trước khi thanh toán!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            var table = selectedTable.Tag as Table;
-            if (table == null)
-            {
-                MessageBox.Show("Bàn không hợp lệ!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            int tableId = table.TableID;
-
-            // 1. Tính tổng tiền
-            decimal total = orderList
-                .Where(o => o.Product != null)
-                .Sum(o => o.Product!.Price * o.Quantity);
-
-            // 2. Thêm Order vào database (Status = 0 tạm thời)
-            Order order = new Order
-            {
-                TableID = tableId,
-                TotalPrice = (int)total,
-                CheckIn = DateTime.Now,
-                Status = 0
-            };
-            int orderId = new OrderDAO().AddOrder(order);
-
-            // 3. Thêm OrderDetails vào database
-            List<OrderDetail> details = orderList
-                .Where(o => o.Product != null)
-                .Select(o => new OrderDetail
+                // Thêm sự kiện AddClicked vào ProductItem
+                item.AddClicked += (s, e) =>
                 {
-                    OrderID = orderId,
-                    ProductID = o.Product!.ProductID,
-                    Amount = o.Quantity
-                }).ToList();
-            new OrderDetailDAO().AddOrderDetails(details);
+                    if (s is ProductItem clickedItem && clickedItem.Product != null)
+                    {
+                        MessageBox.Show($"Thêm {product.ProductName} vào giỏ hàng");
+                    }
+                };
 
-            // 4. Cập nhật Order: thanh toán xong, Status = 1, CheckOut = now
-            new OrderDAO().UpdateOrder(orderId, (int)total, 1);
-
-            MessageBox.Show("Thanh toán hoàn tất!");
-
-            // 5. Hiển thị hóa đơn
-            BillForm billForm = new BillForm();
-            billForm.LoadBill(order, details, orderList);
-            billForm.ShowDialog();
-
-            // 6. Reset orderList + panelOrders
-            orderList.Clear();
-            panelOrders.Controls.Clear();
-
-            // 7. Reset màu bàn
-            selectedTable.BackColor = table.Status ? Color.White : Color.Red;
-            selectedTable = null;
+                panelProducts.Controls.Add(item);
+            }
         }
-
-        private void btnChangeTable_Click(object sender, EventArgs e)
-        {
-
-        }
-
     }
+
 }

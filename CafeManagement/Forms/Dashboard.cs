@@ -9,7 +9,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using CafeManagement.UserControls.Products;
+using CafeManagement.UserControls.Employee;
+using CafeManagement.UserControls.Setting;
 namespace CafeManagement.Forms
 {
     public partial class Dashboard : Form
@@ -93,8 +95,8 @@ namespace CafeManagement.Forms
                 if (currentButton != btn)
                 {
                     SetActiveButton(btn);
-                    splitContainerDashboard.Panel2.Controls.Clear(); // xóa hết nội dung → rỗng
-                    //LoadUserControl(new ucInventory());
+                    // Load product page control
+                    LoadUserControl(new ucProductPage());
                 }
             }
         }
@@ -107,7 +109,16 @@ namespace CafeManagement.Forms
                 if (currentButton != btn)
                 {
                     SetActiveButton(btn);
-                    splitContainerDashboard.Panel2.Controls.Clear(); // xóa hết nội dung → rỗng
+
+                    ucEmployee uc = new ucEmployee();
+
+                    // Load dữ liệu NGAY sau khi tạo UC
+                    uc.ShowEmployeeList();  // <--- QUAN TRỌNG
+
+                    // Gán vào panel
+                    LoadUserControl(uc);
+
+                    //splitContainerDashboard.Panel2.Controls.Clear(); // xóa hết nội dung → rỗng
                     //LoadUserControl(new ucStaff());
                 }
             }
@@ -134,7 +145,14 @@ namespace CafeManagement.Forms
                 if (currentButton != btn)
                 {
                     SetActiveButton(btn);
-                    splitContainerDashboard.Panel2.Controls.Clear(); // xóa hết nội dung → rỗng
+
+                    ucSetting ucSet = new ucSetting();
+
+                    ucSet.ShowTableList(); // <--- QUAN TRỌNG
+
+                    LoadUserControl(ucSet);
+
+                    //splitContainerDashboard.Panel2.Controls.Clear(); // xóa hết nội dung → rỗng
                     //LoadUserControl(new ucStaff());
                 }
             }
@@ -148,6 +166,7 @@ namespace CafeManagement.Forms
                 if (currentButton != btn)
                 {
                     SetActiveButton(btn);
+                    
                     splitContainerDashboard.Panel2.Controls.Clear(); // xóa hết nội dung → rỗng
                     //LoadUserControl(new ucStaff());
                 }
@@ -178,6 +197,9 @@ namespace CafeManagement.Forms
                 return;
             }
         }
+
+
+
 
         private void Dashboard_FormClosed(object? sender, FormClosedEventArgs e)
         {

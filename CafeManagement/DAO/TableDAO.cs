@@ -36,5 +36,49 @@ namespace CafeManagement.DAO
 
             return tables;
         }
+
+        public void InsertTable(string name)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                string query = "INSERT INTO TableCafe (TableName, Status) VALUES (@Name, 0)";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Name", name);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateTable(int id, string newName)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                string query = "UPDATE TableCafe SET TableName=@Name WHERE TableID=@ID";
+                SqlCommand cmd = new SqlCommand(query, conn);
+
+                cmd.Parameters.AddWithValue("@Name", newName);
+                cmd.Parameters.AddWithValue("@ID", id);
+
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void DeleteTable(int id)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                string query = "DELETE FROM TableCafe WHERE TableID=@ID";
+                SqlCommand cmd = new SqlCommand(query, conn);
+
+                cmd.Parameters.AddWithValue("@ID", id);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
     }
 }

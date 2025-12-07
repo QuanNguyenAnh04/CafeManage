@@ -37,28 +37,5 @@ namespace CafeManagement.DAO
 
             return orderDetails;
         }
-
-        // Thêm nhiều OrderDetail cho 1 OrderID
-        public void AddOrderDetails(List<OrderDetail> orderDetails)
-        {
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                conn.Open();
-                foreach (var od in orderDetails)
-                {
-                    string query = @"INSERT INTO OrderDetails (OrderID, ProductID, Amount)
-                                     VALUES (@OrderID, @ProductID, @Amount)";
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@OrderID", od.OrderID);
-                        cmd.Parameters.AddWithValue("@ProductID", od.ProductID);
-                        cmd.Parameters.AddWithValue("@Amount", od.Amount);
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-            }
-        }
-
-
     }
 }

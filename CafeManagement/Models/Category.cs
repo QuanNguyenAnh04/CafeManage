@@ -10,5 +10,9 @@ namespace CafeManagement.Models
     {
         public int CategoryID { get; set; }
         public string CategoryName { get; set; } = string.Empty;
+
+        // Compatibility properties used by other code
+        public int Id { get => CategoryID; set => CategoryID = value; }
+        public string Name { get => CategoryName; set => CategoryName = value; }
     }
 }

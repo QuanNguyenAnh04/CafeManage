@@ -1634,11 +1634,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\nguye\\source\\gitClone\\CafeManagement\\CafeManagement.csproj",
+      "projectUniqueName": "D:\\beforeUnfo\\BảnTRuocgit\\CafeManagement\\CafeManagement\\CafeManagement.csproj",
       "projectName": "CafeManagement",
-      "projectPath": "C:\\Users\\nguye\\source\\gitClone\\CafeManagement\\CafeManagement.csproj",
+      "projectPath": "D:\\beforeUnfo\\BảnTRuocgit\\CafeManagement\\CafeManagement\\CafeManagement.csproj",
       "packagesPath": "C:\\Users\\nguye\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\nguye\\source\\gitClone\\CafeManagement\\obj\\",
+      "outputPath": "D:\\beforeUnfo\\BảnTRuocgit\\CafeManagement\\CafeManagement\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

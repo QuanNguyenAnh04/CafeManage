@@ -103,6 +103,61 @@ namespace CafeManagement.DAO
             return products;
         }
 
+        public Product GetById(int id)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                string query = "SELECT * FROM Products WHERE ProductID = @id";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@id", id);
+                using var reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    return new Product
+                    {
+                        ProductID = (int)reader["ProductID"],
+                        ProductName = reader["ProductName"] as string ?? string.Empty,
+                        CategoryID = (int)reader["CategoryID"],
+                        Status = (bool)reader["Status"],
+                        Price = reader.IsDBNull(reader.GetOrdinal("Price")) ? 0.00m : Convert.ToDecimal(reader["Price"]),
+                        ImageURL = reader["ImageURL"] as string ?? string.Empty
+                    };
+                }
+            }
+            return null;
+        }
 
+        public void Insert(string name, decimal price, byte[] imageBytes, int categoryId)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                string query = "INSERT INTO Products (ProductName, Price, ImageURL, CategoryID, Status) VALUES (@name, @price, @image, @categoryId, 1)";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@name", name);
+                cmd.Parameters.AddWithValue("@price", price);
+                cmd.Parameters.AddWithValue("@image", imageBytes == null || imageBytes.Length == 0 ? (object)DBNull.Value : Convert.ToBase64String(imageBytes));
+                cmd.Parameters.AddWithValue("@categoryId", categoryId);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void Delete(int id)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                string query = "DELETE FROM Products WHERE ProductID = @id";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        // Static wrappers to support legacy static calls
+        public static Product GetByIdStatic(int id) => new ProductDAO().GetById(id);
+        public static void InsertStatic(string name, decimal price, byte[] imageBytes, int categoryId) => new ProductDAO().Insert(name, price, imageBytes, categoryId);
+        public static void DeleteStatic(int id) => new ProductDAO().Delete(id);
     }
 }
